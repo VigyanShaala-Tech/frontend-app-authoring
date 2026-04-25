@@ -200,6 +200,9 @@ const AddComponent = ({
             <ul className="new-component-type list-unstyled m-0 d-flex flex-wrap justify-content-center">
               {componentTemplates.map((component: ComponentTemplateData) => {
                 const { type, displayName, beta } = component;
+                const showBetaBadge = beta
+                  && type !== COMPONENT_TYPES.itembank
+                  && type !== COMPONENT_TYPES.libraryV2;
                 let modalParams: { open: () => void, close: () => void, isOpen: boolean };
 
                 if (!component.templates.length) {
@@ -235,7 +238,7 @@ const AddComponent = ({
                           onClick={() => handleCreateNewXBlock(type)}
                           displayName={displayName}
                           type={type}
-                          beta={beta}
+                          beta={showBetaBadge}
                         />
                       </li>
                     );

@@ -70,3 +70,7 @@ mark {
 .border-left-purple {
   border-left: 3px solid #5E35B1 !important;
 }
+
+button[data-testid="helpToggleButton"] {
+  display: none !important;
+}

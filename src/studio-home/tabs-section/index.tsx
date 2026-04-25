@@ -2,8 +2,6 @@ import { useMemo, useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import {
-  Badge,
-  Stack,
   Tab,
   Tabs,
 } from '@openedx/paragon';
@@ -17,7 +15,6 @@ import messages from './messages';
 import { BaseFilterState, Filter, LibrariesList } from './libraries-tab';
 import LibrariesV2List from './libraries-v2-tab/index';
 import CoursesTab from './courses-tab';
-import { WelcomeLibrariesV2Alert } from './libraries-v2-tab/WelcomeLibrariesV2Alert';
 
 const TabsSection = ({
   showNewCourseContainer,
@@ -96,17 +93,9 @@ const TabsSection = ({
         <Tab
           key={TABS_LIST.libraries}
           eventKey={TABS_LIST.libraries}
-          title={(
-            <Stack gap={2} direction="horizontal">
-              {intl.formatMessage(messages.librariesTabTitle)}
-              <Badge variant="info">{intl.formatMessage(messages.librariesV2TabBetaBadge)}</Badge>
-            </Stack>
-          )}
+          title={intl.formatMessage(messages.librariesTabTitle)}
         >
-          <div>
-            <WelcomeLibrariesV2Alert />
-            <LibrariesV2List />
-          </div>
+          <LibrariesV2List />
         </Tab>,
       );
     }

@@ -42,7 +42,6 @@ const GradingSettings = ({ courseId }) => {
   } = useCourseSettings(courseId);
   const {
     mutate: updateGradingSettings,
-    isLoading: savePending,
     isSuccess: savingStatus,
     isError: savingFailed,
   } = useGradingSettingUpdater(courseId);
@@ -81,13 +80,20 @@ const GradingSettings = ({ courseId }) => {
 
   useEffect(() => {
     if (savingStatus) {
-      setShowSuccessAlert(!showSuccessAlert);
-      setShowSavePrompt(!showSavePrompt);
+      setShowSuccessAlert(true);
+      setShowSavePrompt(false);
+      setIsQueryPending(false);
+      setOverrideInternetConnectionAlert(false);
       setTimeout(() => setShowSuccessAlert(false), 15000);
-      setIsQueryPending(!isQueryPending);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, [savePending]);
+  }, [savingStatus, setShowSavePrompt]);
+
+  useEffect(() => {
+    if (savingFailed) {
+      setIsQueryPending(false);
+    }
+  }, [savingFailed]);
 
   if (isLoadingDenied) {
     return (
