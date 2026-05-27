@@ -42,6 +42,7 @@ import RequirementsSection from './requirements-section';
 import LicenseSection from './license-section';
 import ScheduleSidebar from './schedule-sidebar';
 import messages from './messages';
+import { SCHEDULE_DETAILS_UI } from './featureFlags';
 import { useLoadValuesPrompt, useSaveValuesPrompt } from './hooks';
 
 const ScheduleAndDetails = ({ courseId }) => {
@@ -219,14 +220,16 @@ const ScheduleAndDetails = ({ courseId }) => {
               messages.alertFailAriaDescribedby,
             )}
           />
-          <header>
-            <span className="small text-gray-700">
-              {intl.formatMessage(messages.headingSubtitle)}
-            </span>
-            <h2 className="mb-4 pb-1">
-              {intl.formatMessage(messages.headingTitle)}
-            </h2>
-          </header>
+          {!SCHEDULE_DETAILS_UI.hidePageHeading && (
+            <header>
+              <span className="small text-gray-700">
+                {intl.formatMessage(messages.headingSubtitle)}
+              </span>
+              <h2 className="mb-4 pb-1">
+                {intl.formatMessage(messages.headingTitle)}
+              </h2>
+            </header>
+          )}
         </div>
         <section className="setting-items mb-4">
           <Layout
@@ -300,10 +303,12 @@ const ScheduleAndDetails = ({ courseId }) => {
                   />
                   {enableExtendedCourseDetails && (
                     <>
-                      <LearningOutcomesSection
-                        learningInfo={learningInfo}
-                        onChange={handleValuesChange}
-                      />
+                      {!SCHEDULE_DETAILS_UI.hideLearningOutcomes && (
+                        <LearningOutcomesSection
+                          learningInfo={learningInfo}
+                          onChange={handleValuesChange}
+                        />
+                      )}
                       <InstructorsSection
                         instructors={instructorInfo?.instructors}
                         onChange={handleValuesChange}

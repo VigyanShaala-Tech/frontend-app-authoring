@@ -47,6 +47,17 @@ jest.mock('react-textarea-autosize', () => jest.fn((props) => (
   <textarea {...props} onFocus={() => {}} onBlur={() => {}} />
 )));
 
+jest.mock('./featureFlags', () => ({
+  SCHEDULE_DETAILS_UI: {
+    hidePageHeading: false,
+    hideCourseDuration: false,
+    hideCourseDescription: false,
+    hideLearningOutcomes: false,
+    hideCourseBannerImage: false,
+    hideCourseVideoThumbnail: false,
+  },
+}));
+
 describe('<ScheduleAndDetails />', () => {
   beforeEach(() => {
     const mocks = initializeMocks();

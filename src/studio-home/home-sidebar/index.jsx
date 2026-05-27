@@ -4,6 +4,7 @@ import { MailtoLink } from '@openedx/paragon';
 import { useIntl } from '@edx/frontend-platform/i18n';
 
 import { COURSE_CREATOR_STATES } from '../../constants';
+import { DOCS_OPENEDX_HELP_URLS } from '../../help-urls/docsHelpUrls';
 import { useHelpUrls } from '../../help-urls/hooks';
 import { HelpSidebar, HelpSidebarLink } from '../../generic/help-sidebar';
 import { getStudioHomeData } from '../data/selectors';
@@ -20,6 +21,7 @@ const HomeSidebar = () => {
     courseCreatorStatus,
   } = useSelector(getStudioHomeData);
   const { home: aboutHomeLink } = useHelpUrls(['home']);
+  const gettingStartedDocUrl = aboutHomeLink || DOCS_OPENEDX_HELP_URLS.home;
 
   // eslint-disable-next-line max-len
   const isShowMailToGetInstruction = courseCreatorStatus === COURSE_CREATOR_STATES.disallowedForThisSite
@@ -37,7 +39,8 @@ const HomeSidebar = () => {
       </p>
       <HelpSidebarLink
         as="span"
-        pathToPage={aboutHomeLink || ''}
+        isNewPage={false}
+        pathToPage={gettingStartedDocUrl}
         title={intl.formatMessage(messages.studioHomeLinkToGettingStarted, { studioName })}
       />
       {isShowMailToGetInstruction && (

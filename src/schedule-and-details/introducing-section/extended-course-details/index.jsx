@@ -4,6 +4,7 @@ import TextareaAutosize from 'react-textarea-autosize';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Form } from '@openedx/paragon';
 
+import { SCHEDULE_DETAILS_UI } from '../../featureFlags';
 import messages from './messages';
 
 const ExtendedCourseDetails = ({
@@ -21,7 +22,6 @@ const ExtendedCourseDetails = ({
       helpText: intl.formatMessage(messages.extendedTitleHelpText),
       ariaLabel: intl.formatMessage(messages.extendedTitleAriaLabel),
       controlName: 'title',
-      maxLength: 50,
     },
     {
       value: subtitle,
@@ -29,7 +29,6 @@ const ExtendedCourseDetails = ({
       helpText: intl.formatMessage(messages.extendedSubtitleHelpText),
       ariaLabel: intl.formatMessage(messages.extendedSubtitleAriaLabel),
       controlName: 'subtitle',
-      maxLength: 150,
     },
     {
       value: duration,
@@ -49,16 +48,27 @@ const ExtendedCourseDetails = ({
       asTextarea: true,
     },
   ];
+
+  const visibleFields = paramsForExtendedFields.filter((param) => {
+    if (SCHEDULE_DETAILS_UI.hideCourseDuration && param.controlName === 'duration') {
+      return false;
+    }
+    if (SCHEDULE_DETAILS_UI.hideCourseDescription && param.controlName === 'description') {
+      return false;
+    }
+    return true;
+  });
+
   return (
     <>
-      {paramsForExtendedFields.map((param) => (
+      {visibleFields.map((param) => (
         <Form.Group className="form-group-custom" key={param.label}>
           <Form.Label>{param.label}</Form.Label>
           <Form.Control
             as={param.asTextarea ? TextareaAutosize : 'input'}
             value={param.value}
             name={param.controlName}
-            maxLength={param.maxLength}
+            {...(param.maxLength != null ? { maxLength: param.maxLength } : {})}
             onChange={(e) => onChange(e.target.value, param.controlName)}
             aria-label={param.ariaLabel}
           />

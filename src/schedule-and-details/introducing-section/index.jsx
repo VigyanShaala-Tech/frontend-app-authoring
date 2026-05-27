@@ -10,6 +10,7 @@ import CourseUploadImage from '../../generic/course-upload-image';
 import { WysiwygEditor } from '../../generic/WysiwygEditor';
 import SectionSubHeader from '../../generic/section-sub-header';
 import IntroductionVideo from './introduction-video';
+import { SCHEDULE_DETAILS_UI } from '../featureFlags';
 import ExtendedCourseDetails from './extended-course-details';
 import messages from './messages';
 
@@ -99,7 +100,6 @@ const IntroducingSection = ({
             aria-label={intl.formatMessage(
               messages.courseShortDescriptionAriaLabel,
             )}
-            maxLength={150}
           />
           <Form.Control.Feedback>
             {intl.formatMessage(messages.courseShortDescriptionHelpText)}
@@ -139,24 +139,28 @@ const IntroducingSection = ({
       )}
       {enableExtendedCourseDetails && (
         <>
-          <CourseUploadImage
-            label={intl.formatMessage(messages.courseBannerImageLabel)}
-            identifierFieldText={intl.formatMessage(messages.courseBannerImageInsertText)}
-            assetImagePath={bannerImageAssetPath}
-            assetImageField="bannerImageAssetPath"
-            imageNameField="bannerImageName"
-            showImageBodyText
-            onChange={onChange}
-          />
-          <CourseUploadImage
-            label={intl.formatMessage(messages.courseVideoThumbnailLabel)}
-            identifierFieldText={intl.formatMessage(messages.courseVideoThumbnailInsertText)}
-            assetImagePath={videoThumbnailImageAssetPath}
-            assetImageField="videoThumbnailImageAssetPath"
-            imageNameField="videoThumbnailImageName"
-            showImageBodyText
-            onChange={onChange}
-          />
+          {!SCHEDULE_DETAILS_UI.hideCourseBannerImage && (
+            <CourseUploadImage
+              label={intl.formatMessage(messages.courseBannerImageLabel)}
+              identifierFieldText={intl.formatMessage(messages.courseBannerImageInsertText)}
+              assetImagePath={bannerImageAssetPath}
+              assetImageField="bannerImageAssetPath"
+              imageNameField="bannerImageName"
+              showImageBodyText
+              onChange={onChange}
+            />
+          )}
+          {!SCHEDULE_DETAILS_UI.hideCourseVideoThumbnail && (
+            <CourseUploadImage
+              label={intl.formatMessage(messages.courseVideoThumbnailLabel)}
+              identifierFieldText={intl.formatMessage(messages.courseVideoThumbnailInsertText)}
+              assetImagePath={videoThumbnailImageAssetPath}
+              assetImageField="videoThumbnailImageAssetPath"
+              imageNameField="videoThumbnailImageName"
+              showImageBodyText
+              onChange={onChange}
+            />
+          )}
         </>
       )}
       {aboutPageEditable && (

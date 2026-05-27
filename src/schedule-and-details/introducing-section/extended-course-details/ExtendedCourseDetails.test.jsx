@@ -15,6 +15,17 @@ jest.mock('react-textarea-autosize', () => jest.fn((props) => (
   />
 )));
 
+jest.mock('../../featureFlags', () => ({
+  SCHEDULE_DETAILS_UI: {
+    hidePageHeading: false,
+    hideCourseDuration: false,
+    hideCourseDescription: false,
+    hideLearningOutcomes: false,
+    hideCourseBannerImage: false,
+    hideCourseVideoThumbnail: false,
+  },
+}));
+
 const onChangeMock = jest.fn();
 
 const RootWrapper = (props) => (
