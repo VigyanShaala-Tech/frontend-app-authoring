@@ -1,5 +1,6 @@
 import { RequestStatus } from '../../data/constants';
 
+import { fixBrokenHelpUrls } from '../docsHelpUrls';
 import { getHelpUrls } from './api';
 import { updateLoadingHelpUrlsStatus, updatePages } from './slice';
 
@@ -8,7 +9,7 @@ export function fetchHelpUrls() {
     dispatch(updateLoadingHelpUrlsStatus({ status: RequestStatus.IN_PROGRESS }));
 
     try {
-      const urls = await getHelpUrls();
+      const urls = fixBrokenHelpUrls(await getHelpUrls());
 
       dispatch(updatePages(urls));
 
