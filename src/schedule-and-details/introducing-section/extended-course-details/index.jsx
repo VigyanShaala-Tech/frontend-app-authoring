@@ -50,6 +50,12 @@ const ExtendedCourseDetails = ({
   ];
 
   const visibleFields = paramsForExtendedFields.filter((param) => {
+    if (SCHEDULE_DETAILS_UI.hideCourseTitle && param.controlName === 'title') {
+      return false;
+    }
+    if (SCHEDULE_DETAILS_UI.hideCourseSubtitle && param.controlName === 'subtitle') {
+      return false;
+    }
     if (SCHEDULE_DETAILS_UI.hideCourseDuration && param.controlName === 'duration') {
       return false;
     }

@@ -55,7 +55,7 @@ const messages = defineMessages({
   },
   instructorPhotoHelpText: {
     id: 'course-authoring.schedule-section.instructor.photo.help-text',
-    defaultMessage: 'Please add a photo of the instructor (Note: only JPEG or PNG format supported)',
+    defaultMessage: 'Please upload an instructor photo in JPEG or PNG format, with a recommended size of 200x200px (1:1 square ratio) for proper display on the LMS.',
   },
   instructorPhotoInputPlaceholder: {
     id: 'course-authoring.schedule-section.instructor.photo.input.placeholder',
