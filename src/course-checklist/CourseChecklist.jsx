@@ -12,8 +12,9 @@ import messages from './messages';
 import AriaLiveRegion from './AriaLiveRegion';
 import { RequestStatus } from '../data/constants';
 import ChecklistSection from './ChecklistSection';
-import { fetchCourseLaunchQuery, fetchCourseBestPracticesQuery } from './data/thunks';
-import ConnectionErrorAlert from '../generic/ConnectionErrorAlert';
+import { fetchCourseBestPracticesQuery } from './data/thunks';
+import LaunchChecklist from '../launch-checklist';
+import { useLaunchChecklist } from '../launch-checklist/data/apiHooks';
 
 const CourseChecklist = ({
   courseId,
@@ -24,29 +25,20 @@ const CourseChecklist = ({
   const enableQuality = getConfig().ENABLE_CHECKLIST_QUALITY === 'true';
 
   useEffect(() => {
-    dispatch(fetchCourseLaunchQuery({ courseId }));
     dispatch(fetchCourseBestPracticesQuery({ courseId }));
   }, [courseId]);
 
   const {
     loadingStatus,
-    launchData,
     bestPracticeData,
   } = useSelector(state => state.courseChecklist);
 
-  const { bestPracticeChecklistLoadingStatus, launchChecklistLoadingStatus, launchChecklistStatus } = loadingStatus;
+  const { bestPracticeChecklistLoadingStatus } = loadingStatus;
 
-  const isCourseLaunchChecklistLoading = bestPracticeChecklistLoadingStatus === RequestStatus.IN_PROGRESS;
-  const isCourseBestPracticeChecklistLoading = launchChecklistLoadingStatus === RequestStatus.IN_PROGRESS;
-  const isLoadingDenied = launchChecklistStatus === RequestStatus.DENIED;
-
-  if (isLoadingDenied) {
-    return (
-      <Container size="xl" className="course-unit px-4 mt-4">
-        <ConnectionErrorAlert />
-      </Container>
-    );
-  }
+  const isCourseBestPracticeChecklistLoading = bestPracticeChecklistLoadingStatus === RequestStatus.IN_PROGRESS;
+  // Shares the React Query cache with <LaunchChecklist> below - no duplicate request -
+  // read here only so the existing AriaLiveRegion a11y announcement keeps working.
+  const { isPending: isCourseLaunchChecklistLoading } = useLaunchChecklist(courseId);
 
   return (
     <>
@@ -72,13 +64,7 @@ const CourseChecklist = ({
           }}
         />
         <Stack gap={4}>
-          <ChecklistSection
-            courseId={courseId}
-            dataHeading={intl.formatMessage(messages.launchChecklistLabel)}
-            data={launchData}
-            idPrefix="launchChecklist"
-            isLoading={isCourseLaunchChecklistLoading}
-          />
+          <LaunchChecklist courseId={courseId} />
           {enableQuality && (
             <ChecklistSection
               courseId={courseId}
