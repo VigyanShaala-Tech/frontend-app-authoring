@@ -33,7 +33,7 @@ const BasicSection = ({
     {
       id: 'course-authoring.schedule.basic.email.body',
       defaultMessage:
-        'The course {courseDisplayName}, provided by {platformName}, is open for enrollment. Please navigate to this course at {lmsLinkForAboutPage} to enroll.',
+        'The course {courseDisplayName}, provided by {platformName}, is open for enrollment. To enroll, please visit: {lmsLinkForAboutPage}',
     },
     {
       courseDisplayName,
