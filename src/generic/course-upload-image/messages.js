@@ -3,7 +3,7 @@ import { defineMessages } from '@edx/frontend-platform/i18n';
 const messages = defineMessages({
   uploadImageHelpText: {
     id: 'course-authoring.schedule-section.introducing.upload-image.help-text',
-    defaultMessage: 'Please upload a course image in JPEG or PNG format, with a recommended aspect ratio of 23:10 (e.g., 1880x820px) for proper display on the LMS course listing and About pages.',
+    defaultMessage: 'Please upload a course image in JPEG or PNG format, with a recommended aspect ratio of 3.5:1 (e.g., 1000 x 292 px, 1200 x 350 px, 2400 x 700 px) for proper display on the LMS course listing and about pages.',
   },
   uploadImageFilesAndUploads: {
     id: 'course-authoring.schedule-section.introducing.upload-image.file-and-uploads',
