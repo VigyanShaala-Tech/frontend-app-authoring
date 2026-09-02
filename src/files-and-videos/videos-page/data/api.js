@@ -189,6 +189,18 @@ export async function addVideo(courseId, file, controller) {
   );
 }
 
+/**
+ * VS CUSTOM: tell the backend a direct-to-S3 upload finished so it can fill in
+ * duration/encoding/status (this deployment has no external transcoding
+ * pipeline watching the bucket, so nothing else will ever do this). Fire and
+ * forget -- it runs as an async backend task, the video list will just show
+ * "Uploading" until it completes.
+ */
+export async function finalizeVideoUpload(courseId, edxVideoId) {
+  return getAuthenticatedHttpClient()
+    .post(`${getCourseVideosApiUrl(courseId)}/${edxVideoId}`);
+}
+
 export async function sendVideoUploadStatus(
   courseId,
   edxVideoId,
@@ -209,12 +221,20 @@ export async function uploadVideo(
   uploadingIdsRef,
   videoId,
   controller,
+  metadata = [],
 ) {
   const currentUpload = uploadingIdsRef.current.uploadData[videoId];
+  // The upload_url is a SigV4-presigned S3 PUT: it signs these x-amz-meta-*
+  // header names, so we must send back the exact values the backend used
+  // when it generated the URL or S3 rejects the request with SignatureDoesNotMatch.
+  const metadataHeaders = Object.fromEntries(
+    metadata.map(([name, value]) => [`x-amz-meta-${name}`, value]),
+  );
   return getHttpClient().put(uploadUrl, uploadFile, {
     headers: {
       'Content-Disposition': `attachment; filename="${uploadFile.name}"`,
       'Content-Type': uploadFile.type,
+      ...metadataHeaders,
     },
     multipart: false,
     signal: controller?.signal,

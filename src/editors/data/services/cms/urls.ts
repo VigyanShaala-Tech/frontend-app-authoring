@@ -120,6 +120,12 @@ export const courseVideos = (({ studioEndpointUrl, learningContextId }) => (
   `${studioEndpointUrl}/videos/${learningContextId}`
 )) satisfies UrlFunction;
 
+// VS CUSTOM: tells the backend a direct-to-S3 upload finished, so it can fill
+// in duration/encoding/status. See finalizeVideoUpload in cms/api.ts.
+export const finalizeVideoUpload = (({ studioEndpointUrl, learningContextId, edxVideoId }) => (
+  `${studioEndpointUrl}/videos/${learningContextId}/${edxVideoId}`
+)) satisfies UrlFunction;
+
 export const handlerUrl = (({ studioEndpointUrl, blockId, handlerName }) => (
   `${studioEndpointUrl}/api/xblock/v2/xblocks/${blockId}/handler_url/${handlerName}/`
 )) satisfies UrlFunction;

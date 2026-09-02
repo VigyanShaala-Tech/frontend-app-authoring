@@ -383,6 +383,17 @@ export const apiMethods = {
     urls.courseVideos({ studioEndpointUrl, learningContextId }),
     data,
   ),
+  // VS CUSTOM: no external transcoding pipeline watches the upload bucket for
+  // this deployment, so tell the backend directly once the presigned PUT to
+  // S3 succeeds -- see finalize_uploaded_video in video_storage_handlers.py.
+  finalizeVideoUpload: ({
+    studioEndpointUrl,
+    learningContextId,
+    edxVideoId,
+  }) => post(
+    urls.finalizeVideoUpload({ studioEndpointUrl, learningContextId, edxVideoId }),
+    {},
+  ),
   getHandlerUrl: ({
     studioEndpointUrl,
     blockId,

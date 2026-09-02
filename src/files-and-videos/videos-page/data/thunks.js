@@ -13,6 +13,7 @@ import {
   addVideo,
   deleteVideo,
   fetchVideoList,
+  finalizeVideoUpload,
   getVideos,
   uploadVideo,
   getDownload,
@@ -203,10 +204,12 @@ const addVideoToEdxVal = async (courseId, file, dispatch) => {
     if (createUrlResponse.status < 200 || createUrlResponse.status >= 300) {
       dispatch(failAddVideo({ fileName: file.name }));
     }
-    const [{ uploadUrl, edxVideoId }] = camelCaseObject(
+    const [{ uploadUrl, edxVideoId, metadata }] = camelCaseObject(
       createUrlResponse.data,
     ).files;
-    return { uploadUrl, edxVideoId };
+    return {
+      uploadUrl, edxVideoId, metadata,
+    };
   } catch (error) {
     dispatch(failAddVideo({ fileName: file.name }));
     return {};
@@ -220,6 +223,7 @@ const uploadToBucket = async ({
   uploadingIdsRef,
   edxVideoId,
   dispatch,
+  metadata,
 }) => {
   const currentController = new AbortController();
   controllers.push(currentController);
@@ -232,6 +236,7 @@ const uploadToBucket = async ({
       uploadingIdsRef,
       edxVideoId,
       currentController,
+      metadata,
     );
     if (
       putToServerResponse.status < 200
@@ -252,6 +257,14 @@ const uploadToBucket = async ({
         'Upload completed',
         'upload_completed',
       );
+      // VS CUSTOM: no external transcoding pipeline is watching the bucket,
+      // so kick off backend finalization (duration/encoding/status) ourselves.
+      // Fire-and-forget: it's an async backend task: the list will just show
+      // this video as still processing until it completes.
+      finalizeVideoUpload(courseId, edxVideoId).catch(() => {
+        // eslint-disable-next-line no-console
+        console.error(`Failed to finalize video upload for ${edxVideoId}`);
+      });
     }
     return false;
   } catch (error) {
@@ -320,7 +333,9 @@ export function addVideoFile(
         key: `video_${idx}`,
       });
 
-      const { edxVideoId, uploadUrl } = await addVideoToEdxVal(courseId, file, dispatch);
+      const {
+        edxVideoId, uploadUrl, metadata,
+      } = await addVideoToEdxVal(courseId, file, dispatch);
 
       if (uploadUrl && edxVideoId) {
         uploadingIdsRef.current.uploadData = newUploadData({
@@ -331,7 +346,7 @@ export function addVideoFile(
           edxVideoId,
         });
         hasFailure = await uploadToBucket({
-          courseId, uploadUrl, file, uploadingIdsRef, edxVideoId, dispatch,
+          courseId, uploadUrl, file, uploadingIdsRef, edxVideoId, dispatch, metadata,
         });
       } else {
         hasFailure = true;

@@ -1,6 +1,7 @@
 import { has, find, isEmpty } from 'lodash';
 import { removeItemOnce } from '../../../utils';
 import * as requests from './requests';
+import api from '../../services/cms/api';
 // This 'module' self-import hack enables mocking during tests.
 // See src/editors/decisions/0005-internal-editor-testability-decisions.md. The whole approach to how hooks are tested
 // should be re-thought and cleaned up to avoid this pattern.
@@ -405,7 +406,7 @@ export const replaceTranscript = ({ newFile, newFilename, language }) => (dispat
   }));
 };
 
-export const uploadVideo = ({ supportedFiles, setLoadSpinner, postUploadRedirect }) => (dispatch) => {
+export const uploadVideo = ({ supportedFiles, setLoadSpinner, postUploadRedirect }) => (dispatch, getState) => {
   const data = { files: [] };
   setLoadSpinner(true);
   supportedFiles.forEach((file) => {
@@ -430,11 +431,18 @@ export const uploadVideo = ({ supportedFiles, setLoadSpinner, postUploadRedirect
           return;
         }
         const file = uploadFile.get('file');
+        // The upload_url is a SigV4-presigned S3 PUT: it signs these x-amz-meta-*
+        // header names, so we must send back the exact values the backend used
+        // when it generated the URL or S3 rejects the request with SignatureDoesNotMatch.
+        const metadataHeaders = Object.fromEntries(
+          (fileObj.metadata || []).map(([name, value]) => [`x-amz-meta-${name}`, value]),
+        );
         await fetch(uploadUrl, {
           method: 'PUT',
           headers: {
             'Content-Disposition': `attachment; filename="${file.name}"`,
             'Content-Type': file.type,
+            ...metadataHeaders,
           },
           multipart: false,
           body: file,
@@ -444,6 +452,15 @@ export const uploadVideo = ({ supportedFiles, setLoadSpinner, postUploadRedirect
               throw new Error('Failed to connect with server');
             }
             postUploadRedirect(edxVideoId);
+            // VS CUSTOM: no external transcoding pipeline is watching the
+            // bucket, so kick off backend finalization (duration/encoding/
+            // status) ourselves. Fire-and-forget: it's an async backend task.
+            api.finalizeVideoUpload({
+              studioEndpointUrl: selectors.app.studioEndpointUrl(getState()),
+              learningContextId: selectors.app.learningContextId(getState()),
+              edxVideoId,
+              // eslint-disable-next-line no-console
+            }).catch(() => console.error(`Failed to finalize video upload for ${edxVideoId}`));
           })
           // eslint-disable-next-line no-console
           .catch((error) => console.error('Error uploading file:', error));
