@@ -27,6 +27,7 @@ import CourseChecklist from './course-checklist';
 import GroupConfigurations from './group-configurations';
 import { CourseLibraries } from './course-libraries';
 import { IframeProvider } from './generic/hooks/context/iFrameContext';
+import { useWaffleFlags } from './data/apiHooks';
 
 /**
  * As of this writing, these routes are mounted at a path prefixed with the following:
@@ -46,6 +47,7 @@ import { IframeProvider } from './generic/hooks/context/iFrameContext';
  */
 const CourseAuthoringRoutes = () => {
   const { courseId } = useParams();
+  const waffleFlags = useWaffleFlags(courseId);
 
   return (
     <CourseAuthoringPage courseId={courseId}>
@@ -68,7 +70,7 @@ const CourseAuthoringRoutes = () => {
         />
         <Route
           path="videos"
-          element={getConfig().ENABLE_VIDEO_UPLOAD_PAGE_LINK_IN_CONTENT_DROPDOWN === 'true' ? <PageWrap><VideosPage courseId={courseId} /></PageWrap> : null}
+          element={(getConfig().ENABLE_VIDEO_UPLOAD_PAGE_LINK_IN_CONTENT_DROPDOWN === 'true' || waffleFlags.useNewVideoUploadsPage) ? <PageWrap><VideosPage courseId={courseId} /></PageWrap> : null} // Added by Developer: use waffle flag to check if new video uploads page is enabled
         />
         <Route
           path="pages-and-resources/*"

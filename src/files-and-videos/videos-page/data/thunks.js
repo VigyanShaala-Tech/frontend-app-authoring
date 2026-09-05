@@ -3,6 +3,11 @@ import { camelCase, isEmpty } from 'lodash';
 import { getConfig, camelCaseObject } from '@edx/frontend-platform';
 import { RequestStatus } from '../../../data/constants';
 import {
+  VIDEO_PROCESSING_STATUSES,
+  VIDEO_PROCESSING_POLL_INTERVAL_MS,
+  VIDEO_PROCESSING_POLL_MAX_ATTEMPTS,
+} from './constants';
+import {
   addModels,
   removeModel,
   updateModel,
@@ -76,6 +81,54 @@ export function cancelAllUploads(courseId, uploadData) {
   };
 }
 
+const wait = (ms) => new Promise((resolve) => { setTimeout(resolve, ms); });
+
+// Added by Developer: there is no real transcoding pipeline / webhook telling Studio when a video is
+// done finalizing (see finalize_video_upload_task in edx-platform), so the frontend polls the
+// video list until each of `videoIds` leaves VIDEO_PROCESSING_STATUSES, patching its status and
+// duration in place. This is what turns "Uploaded" into "Ready" automatically, without the user
+// needing to refresh the page.
+export function pollVideoProcessingStatus(courseId, videoIds) {
+  return async (dispatch) => {
+    let pendingIds = videoIds.filter(Boolean);
+    let attempts = 0;
+
+    while (pendingIds.length > 0 && attempts < VIDEO_PROCESSING_POLL_MAX_ATTEMPTS) {
+      attempts += 1;
+      // eslint-disable-next-line no-await-in-loop
+      await wait(VIDEO_PROCESSING_POLL_INTERVAL_MS);
+
+      let videos;
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        ({ videos } = await fetchVideoList(courseId));
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(`Failed to poll video processing status for course ${courseId}.`, error);
+        break;
+      }
+
+      const stillPending = [];
+      const updates = [];
+      pendingIds.forEach((edxVideoId) => {
+        const video = videos.find((candidate) => candidate.edxVideoId === edxVideoId);
+        // Keep polling if the video briefly disappeared from the list (e.g. mid-write) or is
+        // still in a processing status; stop once it reaches any terminal (success/failure) one.
+        if (!video || VIDEO_PROCESSING_STATUSES.includes(video.status)) {
+          stillPending.push(edxVideoId);
+        } else {
+          updates.push({ id: video.edxVideoId, status: video.status, duration: video.duration });
+        }
+      });
+
+      if (updates.length > 0) {
+        dispatch(updateModels({ modelType: 'videos', models: updates }));
+      }
+      pendingIds = stillPending;
+    }
+  };
+}
+
 export function fetchVideos(courseId) {
   return async (dispatch) => {
     dispatch(
@@ -109,6 +162,14 @@ export function fetchVideos(courseId) {
         dispatch(
           updateLoadingStatus({ courseId, status: RequestStatus.SUCCESSFUL }),
         );
+        // Added by Developer: resume watching any videos that were still finalizing when the page loaded
+        // (e.g. the user uploaded, then navigated away and back before it finished).
+        const processingVideoIds = parsedVideos
+          .filter((video) => VIDEO_PROCESSING_STATUSES.includes(video.status))
+          .map((video) => video.id);
+        if (processingVideoIds.length > 0) {
+          dispatch(pollVideoProcessingStatus(courseId, processingVideoIds));
+        }
       }
     } catch (error) {
       if (error.response && error.response.status === 403) {
@@ -251,13 +312,18 @@ const uploadToBucket = async ({
         ...currentVideoData,
         status: RequestStatus.SUCCESSFUL,
       };
-      updateVideoUploadStatus(
+      // Added by Developer: await this -- the video's VAL status only flips from "upload" (displayed
+      // as "Uploading", which the table treats as a failure) to "upload_completed" once this
+      // resolves. Firing it without waiting raced the fetchVideoList() call in addVideoFile()
+      // below and regularly lost, so freshly uploaded videos showed up as "Failed" until the
+      // user manually refreshed the page.
+      await updateVideoUploadStatus(
         courseId,
         edxVideoId,
         'Upload completed',
         'upload_completed',
       );
-      // VS CUSTOM: no external transcoding pipeline is watching the bucket,
+      // Added by Developer: no external transcoding pipeline is watching the bucket,
       // so kick off backend finalization (duration/encoding/status) ourselves.
       // Fire-and-forget: it's an async backend task: the list will just show
       // this video as still processing until it completes.
@@ -367,6 +433,14 @@ export function addVideoFile(
       const parsedVideos = updateFileValues(newVideos, true);
       dispatch(addModels({ modelType: 'videos', models: parsedVideos }));
       dispatch(setVideoIds({ videoIds: newVideoIds.concat(videoIds) }));
+      // Added by Developer: watch the videos we just uploaded until the backend finishes finalizing them
+      // (see pollVideoProcessingStatus), so the table flips from "Uploaded" to "Ready" on its own.
+      const processingVideoIds = newVideos
+        .filter((video) => VIDEO_PROCESSING_STATUSES.includes(video.status))
+        .map((video) => video.edxVideoId);
+      if (processingVideoIds.length > 0) {
+        dispatch(pollVideoProcessingStatus(courseId, processingVideoIds));
+      }
     } catch (error) {
       dispatch(
         updateEditStatus({ editType: 'add', status: RequestStatus.FAILED }),
