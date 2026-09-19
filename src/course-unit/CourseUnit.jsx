@@ -81,6 +81,17 @@ const CourseUnit = ({ courseId }) => {
     document.title = getPageHeadTitle('', unitTitle);
   }, [unitTitle]);
 
+  // Land at the top of the unit page whenever we navigate here (e.g. from
+  // clicking a unit, or from creating a new unit) — otherwise the browser
+  // keeps whatever scroll position the previous page (e.g. the course
+  // outline, scrolled to its last section) was at. useScrollToLastPosition
+  // below still restores a saved position afterward when one exists, so
+  // this only affects the initial landing state.
+  // Added by TitanEd Developer
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [blockId]);
+
   useScrollToLastPosition();
 
   const {
