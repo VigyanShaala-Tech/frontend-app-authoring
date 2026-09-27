@@ -15,5 +15,8 @@
 * [`org.openedx.frontend.authoring.additional_course_plugin.v1`](./AdditionalCoursePluginSlot/)
 * [`org.openedx.frontend.authoring.video_transcript_additional_translations_component.v1`](./AdditionalTranslationsComponentSlot/)
 
+## Header Slot
+* [`org.openedx.frontend.authoring.studio_header_user_menu.v1`](./StudioHeaderUserMenuSlot/)
+
 ## Footer Slot
 * [`org.openedx.frontend.layout.studio_footer.v1`](./StudioFooterSlot/)
