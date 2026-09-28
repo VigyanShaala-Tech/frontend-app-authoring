@@ -179,6 +179,10 @@ initialize({
         LIBRARY_UNSUPPORTED_BLOCKS: (process.env.LIBRARY_UNSUPPORTED_BLOCKS || 'conditional,step-builder,problem-builder').split(','),
         COURSE_TEAM_SUPPORT_EMAIL: process.env.COURSE_TEAM_SUPPORT_EMAIL || null,
         ADMIN_CONSOLE_URL: process.env.ADMIN_CONSOLE_URL || null,
+        // Vigyanshaala links for the Studio header user menu. Set per environment through
+        // MFE_CONFIG_OVERRIDES["authoring"], which the runtime config API merges over these.
+        ANALYTICS_URL: process.env.ANALYTICS_URL || null,
+        TAS_ADMIN_MICROFRONTEND_URL: process.env.TAS_ADMIN_MICROFRONTEND_URL || null,
       }, 'CourseAuthoringConfig');
     },
   },
