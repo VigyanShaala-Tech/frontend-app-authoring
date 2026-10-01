@@ -1,4 +1,3 @@
-import { StudioHeader } from '@edx/frontend-component-header';
 import { getConfig } from '@edx/frontend-platform';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { type Container, useToggle } from '@openedx/paragon';
@@ -9,6 +8,7 @@ import {
   useContentMenuItems, useLibraryToolsMenuItems, useSettingMenuItems, useToolsMenuItems,
 } from './hooks';
 import messages from './messages';
+import StudioHeader from './studio-header';
 
 type ContainerPropsType = Omit<React.ComponentProps<typeof Container>, 'children'>;
 
