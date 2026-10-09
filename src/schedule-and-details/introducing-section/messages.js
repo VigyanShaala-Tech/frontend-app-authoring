@@ -51,7 +51,11 @@ const messages = defineMessages({
   },
   courseBannerImageLabel: {
     id: 'course-authoring.schedule-section.introducing.course-banner-image.label',
-    defaultMessage: 'Course banner image',
+    defaultMessage: 'Course card image for Mobile App',
+  },
+  courseBannerImageHelpText: {
+    id: 'course-authoring.schedule-section.introducing.course-banner-image.help-text',
+    defaultMessage: 'Please upload a course image in JPEG or PNG format, with a recommended size 900 x 900 px for proper display on the Mobile App.',
   },
   courseBannerImageInsertText: {
     id: 'course-authoring.schedule-section.introducing.course-banner-image.insert-banner',

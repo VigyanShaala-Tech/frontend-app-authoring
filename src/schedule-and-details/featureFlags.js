@@ -8,6 +8,6 @@ export const SCHEDULE_DETAILS_UI = {
   hideCourseDuration: true,
   hideCourseDescription: true,
   hideLearningOutcomes: true,
-  hideCourseBannerImage: true,
+  hideCourseBannerImage: false,
   hideCourseVideoThumbnail: true,
 };
