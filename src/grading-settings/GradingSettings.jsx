@@ -20,6 +20,7 @@ import ConnectionErrorAlert from '../generic/ConnectionErrorAlert';
 import SectionSubHeader from '../generic/section-sub-header';
 import SubHeader from '../generic/sub-header/SubHeader';
 import getPageHeadTitle from '../generic/utils';
+import CertificateEligibility from '../certificate-eligibility';
 import AssignmentSection from './assignment-section';
 import CreditSection from './credit-section';
 import DeadlineSection from './deadline-section';
@@ -233,6 +234,7 @@ const GradingSettings = ({ courseId }) => {
                       {intl.formatMessage(messages.addNewAssignmentTypeBtn)}
                     </Button>
                   </section>
+                  <CertificateEligibility courseId={courseId} />
                 </article>
               </Layout.Element>
               <Layout.Element>
