@@ -142,6 +142,7 @@ const IntroducingSection = ({
           {!SCHEDULE_DETAILS_UI.hideCourseBannerImage && (
             <CourseUploadImage
               label={intl.formatMessage(messages.courseBannerImageLabel)}
+              customHelpText={intl.formatMessage(messages.courseBannerImageHelpText)}
               identifierFieldText={intl.formatMessage(messages.courseBannerImageInsertText)}
               assetImagePath={bannerImageAssetPath}
               assetImageField="bannerImageAssetPath"
